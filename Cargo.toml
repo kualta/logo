@@ -1,0 +1,32 @@
+[package]
+name = "logo"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A CLI tool to add logos to images"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yourusername/logo-adder"
+keywords = ["image", "cli", "logo"]
+categories = ["command-line-utilities", "multimedia::images"]
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+image = "0.24"
+thiserror = "1.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.0"
+tempfile = "3.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
+
+[[bin]]
+name = "logo-adder"
+path = "src/main.rs"
