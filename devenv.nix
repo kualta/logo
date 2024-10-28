@@ -1,45 +1,36 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
-  # https://devenv.sh/basics/
-  env.GREET = "devenv";
+  env = {
+    GREET = "devenv";
+    CARGO_HOME = "${config.env.DEVENV_ROOT}/.cargo";
+    RUSTUP_HOME = "${config.env.DEVENV_ROOT}/.rustup";
+  };
 
-  # https://devenv.sh/packages/
-  packages = [ pkgs.git ];
+  packages = with pkgs; [
+    git
+    gcc
+    pkg-config
+    openssl
+    cargo-cross
+    rustup
+  ];
 
-  # https://devenv.sh/languages/
-  languages.rust.enable = true;
-
-  # https://devenv.sh/processes/
-  processes.cargo-watch.exec = "cargo-watch";
-
-  # https://devenv.sh/services/
-  # services.postgres.enable = true;
-
-  # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo hello from $GREET
-  '';
+  languages.rust = {
+    enable = true;
+    channel = "stable";
+    components = [ "rustc" "cargo" "rustfmt" "rust-src" ];
+  };
 
   enterShell = ''
+    rustup default stable
+    rustup target add x86_64-unknown-linux-gnu
     hello
     git --version
   '';
 
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
-
-  # https://devenv.sh/tests/
-  enterTest = ''
-    echo "Running tests"
-    git --version | grep --color=auto "${pkgs.git.version}"
-  '';
-
-  # https://devenv.sh/pre-commit-hooks/
-  # pre-commit.hooks.shellcheck.enable = true;
-
-  # See full reference at https://devenv.sh/reference/options/
+  scripts = {
+    hello.exec = "echo hello from $GREET";
+    build-linux.exec = "cross build --target x86_64-unknown-linux-gnu --release";
+  };
 }

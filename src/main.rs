@@ -14,7 +14,7 @@ struct Args {
     logo: PathBuf,
 
     /// Logo size as percentage of the base image (between 1 and 100)
-    #[arg(short, long, default_value_t = 5.0)]
+    #[arg(long, default_value_t = 1.0)]
     percentage: f32,
 
     /// Position of the logo (top-right, top-left, bottom-right, bottom-left)
@@ -47,19 +47,17 @@ impl From<&str> for Position {
 
 fn calculate_logo_dimensions(
     base_width: u32,
-    base_height: u32,
+    _base_height: u32,
     logo_aspect_ratio: f32,
     percentage: f32,
 ) -> (u32, u32) {
-    // Calculate the area that the logo should occupy
-    let base_area = (base_width * base_height) as f32;
-    let logo_area = base_area * (percentage / 100.0);
+    // Calculate the target width based on the base image width and percentage
+    let target_width = (base_width as f32 * (percentage / 100.0)) as u32;
 
-    // Calculate logo dimensions while maintaining aspect ratio
-    let logo_width = (logo_area * logo_aspect_ratio).sqrt() as u32;
-    let logo_height = (logo_area / logo_aspect_ratio).sqrt() as u32;
+    // Calculate height while maintaining aspect ratio
+    let target_height = (target_width as f32 / logo_aspect_ratio) as u32;
 
-    (logo_width, logo_height)
+    (target_width, target_height)
 }
 
 fn calculate_position(
@@ -95,6 +93,9 @@ fn overlay_logo(
     // Calculate new logo dimensions
     let (logo_width, logo_height) =
         calculate_logo_dimensions(base_width, base_height, logo_aspect_ratio, percentage);
+    println!("Original logo dimensions: {}x{}", logo.width(), logo.height());
+    println!("New logo dimensions: {}x{}", logo_width, logo_height);
+
 
     // Resize logo
     let resized_logo = logo.resize(

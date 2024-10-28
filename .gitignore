@@ -3,6 +3,8 @@
 Cargo.lock
 .direnv
 result
+.rustup
+.cargo
 
 # Devenv
 .devenv*
