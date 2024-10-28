@@ -25,14 +25,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: logo-overlay
-            asset_name: logo-overlay-linux-amd64
+            artifact_name: ku-logo
+            asset_name: ku-logo-linux-amd64
           - os: windows-latest
-            artifact_name: logo-overlay.exe
-            asset_name: logo-overlay-windows-amd64.exe
+            artifact_name: ku-logo.exe
+            asset_name: ku-logo-windows-amd64.exe
           - os: macos-latest
-            artifact_name: logo-overlay
-            asset_name: logo-overlay-macos-amd64
+            artifact_name: ku-logo
+            asset_name: ku-logo-macos-amd64
 
     steps:
     - uses: actions/checkout@v2

@@ -17,7 +17,7 @@ A command-line tool for overlaying logos on images with precise control over siz
 If you have Rust installed, you can install directly from crates.io:
 
 ```bash
-cargo install logo-overlay
+cargo install ku-logo
 ```
 
 ### Manual Installation
