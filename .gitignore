@@ -6,6 +6,12 @@ result
 .rustup
 .cargo
 
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+
 # Devenv
 .devenv*
 devenv.local.nix

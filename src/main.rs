@@ -1,5 +1,7 @@
 use clap::Parser;
 use image::{DynamicImage, GenericImageView, ImageError};
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
@@ -10,11 +12,11 @@ struct Args {
     image: PathBuf,
 
     /// Path to the logo image
-    #[arg(short, long)]
+    #[arg(short, long, default_value = "./logo.png")]
     logo: PathBuf,
 
     /// Logo size as percentage of the base image (between 1 and 100)
-    #[arg(long, default_value_t = 1.0)]
+    #[arg(long, default_value_t = 10.0)]
     percentage: f32,
 
     /// Position of the logo (top-right, top-left, bottom-right, bottom-left)
@@ -23,7 +25,7 @@ struct Args {
 
     /// Output path for the resulting image
     #[arg(short, long)]
-    output: PathBuf,
+    output: Option<PathBuf>,
 }
 
 #[derive(Debug)]
@@ -43,6 +45,14 @@ impl From<&str> for Position {
             _ => Position::TopRight, // Default to top-right for any unrecognized input
         }
     }
+}
+
+fn generate_random_string(length: usize) -> String {
+    thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(length)
+        .map(char::from)
+        .collect()
 }
 
 fn calculate_logo_dimensions(
@@ -93,9 +103,12 @@ fn overlay_logo(
     // Calculate new logo dimensions
     let (logo_width, logo_height) =
         calculate_logo_dimensions(base_width, base_height, logo_aspect_ratio, percentage);
-    println!("Original logo dimensions: {}x{}", logo.width(), logo.height());
+    println!(
+        "Original logo dimensions: {}x{}",
+        logo.width(),
+        logo.height()
+    );
     println!("New logo dimensions: {}x{}", logo_width, logo_height);
-
 
     // Resize logo
     let resized_logo = logo.resize(
@@ -114,11 +127,25 @@ fn overlay_logo(
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
+    let mut args = Args::parse();
 
     // Validate percentage
     if !(1.0..=100.0).contains(&args.percentage) {
         return Err("Percentage must be between 1 and 100".into());
+    }
+
+    // Generate default output path if not provided
+    if args.output.is_none() {
+        let random_suffix = generate_random_string(8);
+        let input_stem = args
+            .image
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .ok_or("Invalid input filename")?;
+        args.output = Some(PathBuf::from(format!(
+            "{}_with_logo_{}.png",
+            input_stem, random_suffix
+        )));
     }
 
     // Load images
@@ -130,8 +157,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = overlay_logo(base_image, logo, args.percentage, position)?;
 
     // Save the result
-    result.save(&args.output)?;
-    println!("Successfully saved output image to {:?}", args.output);
+    let output_path = args.output.as_ref().unwrap();
+    result.save(output_path)?;
+    println!(
+        "Successfully saved output image to {:?}",
+        output_path
+    );
 
     Ok(())
 }
